@@ -5,9 +5,7 @@ namespace ApiAppMusic.Models
     public class MusicDBContext: DbContext
     {
         public MusicDBContext(DbContextOptions<MusicDBContext> options)
-        : base(options)
-        {
-        }
+        : base(options){}
         protected override void OnConfiguring(DbContextOptionsBuilder builder){
             base.OnConfiguring(builder);
         }
@@ -15,5 +13,6 @@ namespace ApiAppMusic.Models
             base.OnModelCreating(modelBuilder);
         }
         public DbSet<Music> musics {get;set;}
+        public DbSet<Singer> singers {get;set;}
     }
 }
