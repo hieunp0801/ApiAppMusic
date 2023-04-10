@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 using static System.Net.WebRequestMethods;
 
@@ -31,12 +32,17 @@ namespace ApiAppMusic.Controllers
         //  Get all music song
         [HttpGet]
         public ActionResult<IEnumerable<Music>>  GetAll(){
-            return _dbContext.musics.ToList();
+            return _dbContext.musics.Include(m => m.Singer).ToList();
+            /*
+            Khi lấy dữ liệu từ _dbContext về thì sẽ ko trả về singer ( Đối tượng singer sẽ bị gán bằng null)
+            sử dụng tính năng Eager Loading của Entity Framework để lấy Singer  
+            sử dụng phương thức Include() trong câu lệnh truy vấn _dbContext.musics.Include(m => m.Singer).ToList();
+            */
         }
         // Get music song by id
         [HttpGet("{id}")]
         public ActionResult<Music> GetById(int id) {
-            var music = _dbContext.musics.FirstOrDefault(m => id == m.Id );
+            var music = _dbContext.musics.Include(m => m.Singer).FirstOrDefault(m => id == m.Id );
             if(music == null){
                 return NotFound();
             }
@@ -44,13 +50,14 @@ namespace ApiAppMusic.Controllers
         }
         // Add new music song
         [HttpPost]
-        public IActionResult AddMusicSong([FromForm] string musicName,[FromForm] string fileName,[FromForm] int idSinger ){
+        public async Task<IActionResult> AddMusicSong([FromForm] string musicName,[FromForm] IFormFile file,[FromForm] int idSinger ){
            
             Singer singer = _dbContext.singers.FirstOrDefault(s => idSinger == s.Id);
             if(singer == null){
                 return NotFound();
             }
-             Music music = new Music(){
+            string fileName = await fileUploadService.Upload(file,"music") ;
+            Music music = new Music(){
                 NameMusic = musicName,
                 FileMusic = fileName,
                 Singer = singer
@@ -58,6 +65,35 @@ namespace ApiAppMusic.Controllers
             _dbContext.musics.Add(music);
             _dbContext.SaveChanges();
             return Ok("Insert sucessfully");
+        }
+        [HttpPut("{idMusic}")]
+        public async Task<IActionResult> ModifyMusicSong([FromRoute] int idMusic,[FromForm] string musicName,[FromForm] IFormFile file,[FromForm] int idSinger ){
+           
+            Singer singer = _dbContext.singers.FirstOrDefault(s => idSinger == s.Id);
+            if(singer == null){
+                return NotFound();
+            }
+            
+            
+            Music music = _dbContext.musics.FirstOrDefault(m => m.Id == idMusic );
+            if(file != null){
+                string fileName = await fileUploadService.Upload(file,"music");
+                music.FileMusic = fileName;
+            }
+            music.NameMusic = musicName;
+            music.Singer = singer;
+            _dbContext.SaveChanges();
+            return Ok("Update sucessfully");
+        }
+        [HttpDelete("{idMusic}")]
+        public ActionResult DeleteMusicSong([FromRoute] int idMusic){
+            var music = _dbContext.musics.FirstOrDefault(m => idMusic == m.Id );
+            if(music == null){
+                return NotFound();
+            }
+            _dbContext.musics.Remove(music);
+            _dbContext.SaveChanges();
+            return Ok("Delete Sucessfully");
         }
         // Upload
         // [HttpPost("/upload")]

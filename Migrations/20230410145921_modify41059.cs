@@ -2,7 +2,7 @@
 
 namespace ApiAppMusic.Migrations
 {
-    public partial class modify_music : Migration
+    public partial class modify41059 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -20,23 +20,13 @@ namespace ApiAppMusic.Migrations
                 table: "musics",
                 newName: "IX_musics_SingerId");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "SingerId",
-                table: "musics",
-                type: "int",
-                nullable: false,
-                defaultValue: 0,
-                oldClrType: typeof(int),
-                oldType: "int",
-                oldNullable: true);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_musics_singers_SingerId",
                 table: "musics",
                 column: "SingerId",
                 principalTable: "singers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -54,14 +44,6 @@ namespace ApiAppMusic.Migrations
                 name: "IX_musics_SingerId",
                 table: "musics",
                 newName: "IX_musics_singerId");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "singerId",
-                table: "musics",
-                type: "int",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "int");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_musics_singers_singerId",

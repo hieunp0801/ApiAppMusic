@@ -23,6 +23,5 @@ namespace ApiAppMusic.Models
         [MaxLength(255)]
         [Column(TypeName="nvarchar")]
         public string DateofBirth {get;set;}
-        public List<Music> Musics {get;set;}
     }
 }
