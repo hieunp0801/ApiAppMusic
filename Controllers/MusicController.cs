@@ -44,18 +44,28 @@ namespace ApiAppMusic.Controllers
         }
         // Add new music song
         [HttpPost]
-        public IActionResult AddMusicSong(Music music){
+        public IActionResult AddMusicSong([FromForm] string musicName,[FromForm] string fileName,[FromForm] int idSinger ){
+           
+            Singer singer = _dbContext.singers.FirstOrDefault(s => idSinger == s.Id);
+            if(singer == null){
+                return NotFound();
+            }
+             Music music = new Music(){
+                NameMusic = musicName,
+                FileMusic = fileName,
+                Singer = singer
+            };
             _dbContext.musics.Add(music);
             _dbContext.SaveChanges();
-            return CreatedAtAction(nameof(GetById), new { id = music.Id }, music);
+            return Ok("Insert sucessfully");
         }
         // Upload
-        [HttpPost("/upload")]
-        public async Task<IActionResult> Upload(IFormFile file)
-        {
-            string res = await fileUploadService.Upload(file,"uploads");
-            return Ok(res);
-        }
+        // [HttpPost("/upload")]
+        // public async Task<IActionResult> Upload(IFormFile file)
+        // {
+        //     string res = await fileUploadService.Upload(file,"uploads");
+        //     return Ok(res);
+        // }
         // End upload
 
         // GET IMAGE

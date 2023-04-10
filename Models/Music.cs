@@ -15,5 +15,8 @@ namespace ApiAppMusic.Models
         [Required]
         [Column(TypeName= "nvarchar")]
         public string FileMusic {get;set;}
+        [Required]
+
+        public Singer Singer {get;set;}
     }
 }
