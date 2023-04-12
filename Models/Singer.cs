@@ -18,10 +18,11 @@ namespace ApiAppMusic.Models
         [MaxLength(255)]
         [Column(TypeName="nvarchar")]
         public string ImageSinger {get;set;}
-        
         [Required]
         [MaxLength(255)]
         [Column(TypeName="nvarchar")]
         public string DateofBirth {get;set;}
+
+        
     }
 }
