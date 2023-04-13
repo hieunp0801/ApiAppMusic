@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,11 +28,21 @@ namespace ApiAppMusic.Controllers
         }
         [HttpGet("{id}")]
         public ActionResult<IEnumerable<Music>> GetById([FromRoute] int id){
-            // var singers = _dbContext.singers;
+            var singers = _dbContext.singers;
             var musicPlaylists = _dbContext.musicPlaylists.Where(m => m.IdPlaylist == id)
             .Include( m => m.Music);
-            var musics = musicPlaylists.Select(m => m.Music).ToList();
+            // var musics = musicPlaylists.Select(m => m.Music).ToList();
+            var musics = musicPlaylists.Select( m => m.Music).ToList();
             return musics;
+        }
+        [HttpGet("{id}/musics")]
+        public ActionResult<IEnumerable<Music>> GetAllMusic ([FromRoute] int id){
+           var res = _dbContext.musicPlaylists
+            .Where(mp => mp.IdPlaylist == id)
+            .Include(mp => mp.Music)
+            .ThenInclude(m => m.Singer);
+            return res.Select(m => m.Music).ToList();
+
         }
 
         [HttpPost]
@@ -63,6 +74,15 @@ namespace ApiAppMusic.Controllers
             _dbContext.SaveChanges();
 
             return Ok("Insert successfully");
+        }
+        [HttpDelete("{idPlaylist}/music/{idMusic}")]
+        public ActionResult DeleteMusicFromPlaylist([FromRoute] int IdMusic,[FromRoute] int IdPlaylist){
+            var playlist = _dbContext.musicPlaylists.FirstOrDefault(mp => mp.IdPlaylist == IdPlaylist && mp.IdMusic == IdMusic);
+            if(playlist == null)
+                return NotFound();
+            _dbContext.musicPlaylists.Remove(playlist);
+            _dbContext.SaveChanges();
+            return Ok("Delete Successfully");
         }
 
     }

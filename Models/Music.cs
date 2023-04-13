@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
 namespace ApiAppMusic.Models
 {
     public class Music
@@ -18,6 +17,7 @@ namespace ApiAppMusic.Models
         public string FileMusic {get;set;}
         [Required]
 
+ 
         public Singer Singer {get;set;}
         public IEnumerable<MusicPlaylist> MusicPlaylists {get;set;}
     }

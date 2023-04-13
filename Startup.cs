@@ -33,6 +33,9 @@ namespace ApiAppMusic
                             string connectstring = Configuration.GetConnectionString("MusicContext");
                             options.UseSqlServer(connectstring);
                         });
+            services.AddControllers().AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
