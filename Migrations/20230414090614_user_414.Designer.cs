@@ -4,14 +4,16 @@ using ApiAppMusic.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace ApiAppMusic.Migrations
 {
     [DbContext(typeof(MusicDBContext))]
-    partial class MusicDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230414090614_user_414")]
+    partial class user_414
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -151,12 +153,7 @@ namespace ApiAppMusic.Migrations
                     b.Property<string>("Url")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("userId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("userId");
 
                     b.ToTable("playlists");
                 });
@@ -349,15 +346,6 @@ namespace ApiAppMusic.Migrations
                     b.Navigation("Music");
 
                     b.Navigation("Playlist");
-                });
-
-            modelBuilder.Entity("ApiAppMusic.Models.Playlist", b =>
-                {
-                    b.HasOne("ApiAppMusic.Models.ApplicationUser", "user")
-                        .WithMany()
-                        .HasForeignKey("userId");
-
-                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

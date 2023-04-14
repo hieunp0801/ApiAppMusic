@@ -1,13 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 using ApiAppMusic.Models;
 using ApiAppMusic.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ApiAppMusic.Controllers
 {
@@ -17,10 +24,12 @@ namespace ApiAppMusic.Controllers
     {
         MusicDBContext _dbContext;
         IWebHostEnvironment _env;
+        IConfiguration _configuration;
         private FileUploadService fileUploadService = new FileUploadService();
-        public PlaylistController(MusicDBContext dBContext, IWebHostEnvironment env){
+        public PlaylistController(MusicDBContext dBContext, IWebHostEnvironment env, IConfiguration configuration){
             _dbContext = dBContext;
             _env = env;
+            _configuration = configuration;
         }
         [HttpGet]
         public ActionResult<IEnumerable<Playlist>>  GetAll(){
@@ -36,7 +45,7 @@ namespace ApiAppMusic.Controllers
             return musics;
         }
         [HttpGet("{id}/musics")]
-        public ActionResult<IEnumerable<Music>> GetAllMusic ([FromRoute] int id){
+        public ActionResult<IEnumerable<Music>> GetAllMusicByIdPlaylist ([FromRoute] int id){
            var res = _dbContext.musicPlaylists
             .Where(mp => mp.IdPlaylist == id)
             .Include(mp => mp.Music)
@@ -83,6 +92,47 @@ namespace ApiAppMusic.Controllers
             _dbContext.musicPlaylists.Remove(playlist);
             _dbContext.SaveChanges();
             return Ok("Delete Successfully");
+        }
+        [Authorize]
+        [HttpGet("/test")]
+        public ActionResult test(){
+            
+            var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, "username")
+                }),
+                Expires = DateTime.UtcNow.AddMinutes(Convert.ToInt32(_configuration["Jwt:ExpiresInMinutes"])),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            try
+            {
+                var claims = tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = _configuration["Jwt:Issuer"],
+                    ValidAudience = _configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                }, out SecurityToken validatedToken);
+
+                var username = claims.FindFirst(ClaimTypes.Name)?.Value;
+                return Ok(username);
+                // sử dụng username để lấy thông tin user trong database hoặc nơi khác
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                // xử lý nếu token không hợp lệ
+            }
+            return Ok("truy cap thanh cong");
         }
 
     }

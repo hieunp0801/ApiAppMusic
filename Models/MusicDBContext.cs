@@ -1,8 +1,9 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace ApiAppMusic.Models
 {
-    public class MusicDBContext: DbContext
+    public class MusicDBContext: IdentityDbContext<ApplicationUser>
     {
         public MusicDBContext(DbContextOptions<MusicDBContext> options)
         : base(options){}

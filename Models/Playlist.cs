@@ -11,5 +11,7 @@ namespace ApiAppMusic.Models
         public string Url {get;set;}
         
         public IEnumerable<MusicPlaylist> MusicPlaylists{get;set;}
+
+        public ApplicationUser user {get;set;}
     }
 }
