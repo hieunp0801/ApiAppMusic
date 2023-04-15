@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using ApiAppMusic.Services;
 
 namespace ApiAppMusic
 {
@@ -32,6 +33,7 @@ namespace ApiAppMusic
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped<UserService>();
 
             services.AddDbContext<MusicDBContext>(options => {
                             string connectstring = Configuration.GetConnectionString("MusicContext");
