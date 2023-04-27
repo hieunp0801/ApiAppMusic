@@ -5,6 +5,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using ApiAppMusic.Models;
+using ApiAppMusic.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -16,14 +18,18 @@ namespace ApiAppMusic.Controllers
     [Route("api/[controller]")]
     public class AccountController: ControllerBase
     {
+        private readonly MusicDBContext _dbContext;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        UserService _userService;
+        public AccountController(MusicDBContext dbContext,UserService userService,UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
+            _userService = userService;
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _dbContext = dbContext;
         }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterModel model)
@@ -105,5 +111,50 @@ namespace ApiAppMusic.Controllers
 
             return Unauthorized();
         }
-    }
+        [Authorize]
+        [HttpGet("my-profile")]
+        public async Task<ApplicationUser> getUser(){
+            
+            var user = await _userService.getUserLogin(_userManager,_configuration,HttpContext);
+            return user;      
+            
+            
+        }
+        [Authorize]
+        [HttpPut("update")]
+        public async Task<ActionResult> updateProfile([FromForm] string name, [FromForm] string email,[FromForm] string phoneNumber,[FromForm] string dob){
+            var user = await _userService.getUserLogin(_userManager,_configuration,HttpContext);
+            var id = user.Id;
+            var userdb = await _userManager.FindByIdAsync(id);
+            if(userdb != null){
+                userdb.Name = name;
+                userdb.Email = email;
+                user.PhoneNumber = phoneNumber;
+                user.DateOfBirth = dob;
+                 var result = await _userManager.UpdateAsync(user);
+            }
+
+            return Ok("Update successfully");
+            
+        }
+        [Authorize]
+        [HttpPut("change-password")]
+        public async Task<ActionResult> changePassword([FromForm] string pw,[FromForm] string cfpw,[FromForm] string password){
+            var user = await _userService.getUserLogin(_userManager,_configuration,HttpContext);
+            var id = user.Id;
+            var userdb = await _userManager.FindByIdAsync(id);
+            if (user != null && await _userManager.CheckPasswordAsync(userdb, password)){
+                var changePasswordResult = await _userManager.ChangePasswordAsync(user, password, cfpw);
+                if(changePasswordResult.Succeeded){
+                    return Ok("Change password sucessfully");
+                }
+                else {
+                    return Ok("Change password failed");
+                }
+            }
+            else
+                return Ok("Find user failed");
+        }
+
+    }      
 }
