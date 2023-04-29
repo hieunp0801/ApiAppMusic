@@ -107,6 +107,17 @@ namespace ApiAppMusic.Controllers
             return Ok("Delete Successfully");
         }
         [Authorize]
+        [HttpDelete("{idPlaylist}")]
+        public ActionResult DeleteMusicSong([FromRoute] int idPlaylist){
+            var playlist = _dbContext.playlists.FirstOrDefault(pl => idPlaylist == pl.Id );
+            if(playlist == null){
+                return NotFound();
+            }
+            _dbContext.playlists.Remove(playlist);
+            _dbContext.SaveChanges();
+            return Ok("Delete Sucessfully");
+        }
+        [Authorize]
         [HttpGet("/test")]
         public async Task<ActionResult> TestAuthorize(){
             
